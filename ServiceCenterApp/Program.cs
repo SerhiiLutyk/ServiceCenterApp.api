@@ -1,3 +1,6 @@
+using Microsoft.EntityFrameworkCore;
+
+
 
 namespace ServiceCenterApp
 {
@@ -13,6 +16,11 @@ namespace ServiceCenterApp
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+
+            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+            builder.Services.AddDbContext<RepairDbContext>(options =>
+                options.UseSqlServer(connectionString));
 
             var app = builder.Build();
 

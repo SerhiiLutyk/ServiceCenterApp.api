@@ -10,7 +10,7 @@ namespace ServiceCenterAppDalEF
         {
             var optionsBuilder = new DbContextOptionsBuilder<RepairDbContext>();
 
-            optionsBuilder.UseNpgsql("Host=localhost;Database=ServiceDb;Username=postgres;Password=yourpassword");
+            optionsBuilder.UseNpgsql("Host=localhost;Database=ServiceDb;Username=postgres;Password=root");
 
             return new RepairDbContext(optionsBuilder.Options);
         }
