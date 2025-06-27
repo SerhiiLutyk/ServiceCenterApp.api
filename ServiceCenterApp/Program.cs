@@ -1,6 +1,10 @@
+using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using RepairServiceDAL.DbCreating;
+using ServiceCenterApp.Validations.Client;
 using ServiceCenterAppBLL.Mapping;
+using FluentValidation;
+
 
 namespace ServiceCenterApp
 {
@@ -20,6 +24,12 @@ namespace ServiceCenterApp
                 options.UseNpgsql(connectionString));
 
             builder.Services.AddAutoMapper(typeof(AutoMapperProfile).Assembly);
+
+            builder.Services.AddControllers();
+            builder.Services.AddFluentValidationAutoValidation();
+            builder.Services.AddValidatorsFromAssemblyContaining<ClientCreateDtoValidator>();
+
+
 
             var app = builder.Build();
 
