@@ -11,7 +11,7 @@ namespace RepairServiceDAL.Repositories
     public class GenericRepository<T> : IGenericRepository<T> where T : class
     {
         protected readonly RepairDbContext _context;
-        protected readonly DbSet<T> dbSet; // <-- ОГОЛОШЕНО!
+        protected readonly DbSet<T> dbSet;
 
         public GenericRepository(RepairDbContext context)
         {
