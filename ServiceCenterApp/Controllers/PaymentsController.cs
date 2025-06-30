@@ -3,9 +3,11 @@ using ServiceCenterAppBLL.DTO.PaymentDto;
 using ServiceCenterAppBLL.Interfaces;
 using ServiceCenterAppBLL.Filters;
 using ServiceCenterAppBLL.Pagination;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ServiceCenterApp.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     [ServiceFilter(typeof(LoggingFilter))]
@@ -22,6 +24,7 @@ namespace ServiceCenterApp.Controllers
         /// Отримати всі платежі з пагінацією
         /// </summary>
         [HttpGet]
+        [Authorize(Roles = "Admin,User")]
         public async Task<ActionResult<PagedList<PaymentResponseDto>>> GetPayments(
             [FromQuery] int page = 1, 
             [FromQuery] int pageSize = 10,
@@ -37,6 +40,7 @@ namespace ServiceCenterApp.Controllers
         /// Отримати платіж за ID
         /// </summary>
         [HttpGet("{id}")]
+        [Authorize(Roles = "Admin,User")]
         public async Task<ActionResult<PaymentResponseDto>> GetPayment(int id)
         {
             var payment = await _paymentService.GetByIdAsync(id);
@@ -47,6 +51,7 @@ namespace ServiceCenterApp.Controllers
         /// Створити новий платіж
         /// </summary>
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         [ServiceFilter(typeof(ValidationFilter))]
         public async Task<ActionResult<PaymentResponseDto>> CreatePayment([FromBody] PaymentCreateDto paymentDto)
         {
@@ -58,6 +63,7 @@ namespace ServiceCenterApp.Controllers
         /// Оновити платіж
         /// </summary>
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         [ServiceFilter(typeof(ValidationFilter))]
         public async Task<ActionResult<PaymentResponseDto>> UpdatePayment(int id, [FromBody] PaymentUpdateDto paymentDto)
         {
@@ -69,6 +75,7 @@ namespace ServiceCenterApp.Controllers
         /// Видалити платіж
         /// </summary>
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult> DeletePayment(int id)
         {
             await _paymentService.DeleteAsync(id);

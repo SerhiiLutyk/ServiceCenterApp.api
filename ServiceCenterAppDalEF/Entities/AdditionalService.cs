@@ -9,10 +9,10 @@ namespace ServiceCenterAppDalEF.Entities
     public class AdditionalService
     {
         public int ServiceId { get; set; }
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
         public decimal? Price { get; set; }
 
-        public ICollection<Order> Orders { get; set; }
+        public ICollection<Order> Orders { get; set; } = new List<Order>();
     }
 
 }

@@ -25,8 +25,15 @@ public class ClientService : IClientService
         var query = _uow.Clients.GetAll();
         if (!string.IsNullOrEmpty(searchTerm))
         {
-            query = query.Where(x => x.FirstName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
-                                   x.Phone.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+            int idValue;
+            bool isId = int.TryParse(searchTerm, out idValue);
+            query = query.Where(x =>
+                x.FirstName.ToLower().Contains(searchTerm.ToLower()) ||
+                x.LastName.ToLower().Contains(searchTerm.ToLower()) ||
+                x.Phone.ToLower().Contains(searchTerm.ToLower()) ||
+                x.Email.ToLower().Contains(searchTerm.ToLower())
+                || (isId && x.ClientId == idValue)
+            );
         }
         var totalCount = query.Count();
         var items = query.Skip((page - 1) * pageSize).Take(pageSize).ToList();

@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using ServiceCenterAppBLL.Interfaces;
 using ServiceCenterAppBLL.Filters;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ServiceCenterApp.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     [ServiceFilter(typeof(LoggingFilter))]

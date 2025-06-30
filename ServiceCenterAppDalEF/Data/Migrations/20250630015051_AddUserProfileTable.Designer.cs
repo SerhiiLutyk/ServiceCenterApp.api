@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ServiceCenterAppDalEF.DbCreating;
@@ -11,9 +12,11 @@ using ServiceCenterAppDalEF.DbCreating;
 namespace ServiceCenterAppDalEF.Data.Migrations
 {
     [DbContext(typeof(RepairDbContext))]
-    partial class RepairDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250630015051_AddUserProfileTable")]
+    partial class AddUserProfileTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -247,17 +250,9 @@ namespace ServiceCenterAppDalEF.Data.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ClientId"));
 
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<string>("FirstName")
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
-
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.Property<string>("Phone")
                         .HasMaxLength(20)

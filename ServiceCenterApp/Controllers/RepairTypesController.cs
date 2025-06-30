@@ -3,9 +3,11 @@ using ServiceCenterAppBLL.DTO.RepairTypeDto;
 using ServiceCenterAppBLL.Interfaces;
 using ServiceCenterAppBLL.Filters;
 using ServiceCenterAppBLL.Pagination;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ServiceCenterApp.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     [ServiceFilter(typeof(LoggingFilter))]
@@ -22,6 +24,7 @@ namespace ServiceCenterApp.Controllers
         /// Отримати всі типи ремонту з пагінацією
         /// </summary>
         [HttpGet]
+        [Authorize(Roles = "Admin,User")]
         public async Task<ActionResult<PagedList<RepairTypeResponseDto>>> GetRepairTypes(
             [FromQuery] int page = 1, 
             [FromQuery] int pageSize = 10,
@@ -35,6 +38,7 @@ namespace ServiceCenterApp.Controllers
         /// Отримати тип ремонту за ID
         /// </summary>
         [HttpGet("{id}")]
+        [Authorize(Roles = "Admin,User")]
         public async Task<ActionResult<RepairTypeResponseDto>> GetRepairType(int id)
         {
             var repairType = await _repairTypeService.GetByIdAsync(id);
@@ -45,6 +49,7 @@ namespace ServiceCenterApp.Controllers
         /// Створити новий тип ремонту
         /// </summary>
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         [ServiceFilter(typeof(ValidationFilter))]
         public async Task<ActionResult<RepairTypeResponseDto>> CreateRepairType([FromBody] RepairTypeCreateDto repairTypeDto)
         {
@@ -56,6 +61,7 @@ namespace ServiceCenterApp.Controllers
         /// Оновити тип ремонту
         /// </summary>
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         [ServiceFilter(typeof(ValidationFilter))]
         public async Task<ActionResult<RepairTypeResponseDto>> UpdateRepairType(int id, [FromBody] RepairTypeUpdateDto repairTypeDto)
         {
@@ -67,6 +73,7 @@ namespace ServiceCenterApp.Controllers
         /// Видалити тип ремонту
         /// </summary>
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult> DeleteRepairType(int id)
         {
             await _repairTypeService.DeleteAsync(id);

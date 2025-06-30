@@ -3,9 +3,11 @@ using ServiceCenterAppBLL.DTO.AdditionalServiceDto;
 using ServiceCenterAppBLL.Interfaces;
 using ServiceCenterAppBLL.Filters;
 using ServiceCenterAppBLL.Pagination;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ServiceCenterApp.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     [ServiceFilter(typeof(LoggingFilter))]
@@ -22,6 +24,7 @@ namespace ServiceCenterApp.Controllers
         /// Отримати всі додаткові послуги з пагінацією
         /// </summary>
         [HttpGet]
+        [Authorize(Roles = "Admin,User")]
         public async Task<ActionResult<PagedList<AdditionalServiceResponseDto>>> GetAdditionalServices(
             [FromQuery] int page = 1, 
             [FromQuery] int pageSize = 10,
@@ -35,6 +38,7 @@ namespace ServiceCenterApp.Controllers
         /// Отримати додаткову послугу за ID
         /// </summary>
         [HttpGet("{id}")]
+        [Authorize(Roles = "Admin,User")]
         public async Task<ActionResult<AdditionalServiceResponseDto>> GetAdditionalService(int id)
         {
             var service = await _additionalServiceService.GetByIdAsync(id);
@@ -45,6 +49,7 @@ namespace ServiceCenterApp.Controllers
         /// Створити нову додаткову послугу
         /// </summary>
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         [ServiceFilter(typeof(ValidationFilter))]
         public async Task<ActionResult<AdditionalServiceResponseDto>> CreateAdditionalService([FromBody] AdditionalServiceCreateDto serviceDto)
         {
@@ -56,6 +61,7 @@ namespace ServiceCenterApp.Controllers
         /// Оновити додаткову послугу
         /// </summary>
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         [ServiceFilter(typeof(ValidationFilter))]
         public async Task<ActionResult<AdditionalServiceResponseDto>> UpdateAdditionalService(int id, [FromBody] AdditionalServiceUpdateDto serviceDto)
         {
@@ -67,6 +73,7 @@ namespace ServiceCenterApp.Controllers
         /// Видалити додаткову послугу
         /// </summary>
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult> DeleteAdditionalService(int id)
         {
             await _additionalServiceService.DeleteAsync(id);

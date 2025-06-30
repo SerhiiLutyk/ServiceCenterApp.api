@@ -25,7 +25,12 @@ public class AdditionalServiceService : IAdditionalServiceService
         
         if (!string.IsNullOrEmpty(searchTerm))
         {
-            query = query.Where(x => x.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+            int idValue;
+            bool isId = int.TryParse(searchTerm, out idValue);
+            query = query.Where(x =>
+                x.Name.ToLower().Contains(searchTerm.ToLower())
+                || (isId && x.ServiceId == idValue)
+            );
         }
 
         var totalCount = query.Count();

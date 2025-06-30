@@ -25,7 +25,12 @@ public class RepairTypeService : IRepairTypeService
         
         if (!string.IsNullOrEmpty(searchTerm))
         {
-            query = query.Where(x => x.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+            int idValue;
+            bool isId = int.TryParse(searchTerm, out idValue);
+            query = query.Where(x =>
+                x.Name.ToLower().Contains(searchTerm.ToLower())
+                || (isId && x.RepairTypeId == idValue)
+            );
         }
 
         var totalCount = query.Count();

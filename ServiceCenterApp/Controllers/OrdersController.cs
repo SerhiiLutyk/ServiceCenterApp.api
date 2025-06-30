@@ -3,9 +3,11 @@ using ServiceCenterAppBLL.DTO.OrderDto;
 using ServiceCenterAppBLL.Interfaces;
 using ServiceCenterAppBLL.Filters;
 using ServiceCenterAppBLL.Pagination;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ServiceCenterApp.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     [ServiceFilter(typeof(LoggingFilter))]
@@ -22,6 +24,7 @@ namespace ServiceCenterApp.Controllers
         /// Отримати всі замовлення з пагінацією
         /// </summary>
         [HttpGet]
+        [Authorize(Roles = "Admin,User")]
         public async Task<ActionResult<PagedList<OrderResponseDto>>> GetOrders(
             [FromQuery] int page = 1, 
             [FromQuery] int pageSize = 10,
@@ -37,6 +40,7 @@ namespace ServiceCenterApp.Controllers
         /// Отримати замовлення за ID
         /// </summary>
         [HttpGet("{id}")]
+        [Authorize(Roles = "Admin,User")]
         public async Task<ActionResult<OrderResponseDto>> GetOrder(int id)
         {
             var order = await _orderService.GetByIdAsync(id);
@@ -47,6 +51,7 @@ namespace ServiceCenterApp.Controllers
         /// Створити нове замовлення
         /// </summary>
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         [ServiceFilter(typeof(ValidationFilter))]
         public async Task<ActionResult<OrderResponseDto>> CreateOrder([FromBody] OrderCreateDto orderDto)
         {
@@ -58,6 +63,7 @@ namespace ServiceCenterApp.Controllers
         /// Оновити замовлення
         /// </summary>
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         [ServiceFilter(typeof(ValidationFilter))]
         public async Task<ActionResult<OrderResponseDto>> UpdateOrder(int id, [FromBody] OrderUpdateDto orderDto)
         {
@@ -69,6 +75,7 @@ namespace ServiceCenterApp.Controllers
         /// Видалити замовлення
         /// </summary>
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult> DeleteOrder(int id)
         {
             await _orderService.DeleteAsync(id);
@@ -89,6 +96,7 @@ namespace ServiceCenterApp.Controllers
         /// Змінити статус замовлення
         /// </summary>
         [HttpPatch("{id}/status")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<OrderResponseDto>> UpdateOrderStatus(int id, [FromBody] string status)
         {
             var updatedOrder = await _orderService.UpdateStatusAsync(id, status);
@@ -99,6 +107,7 @@ namespace ServiceCenterApp.Controllers
         /// Отримати замовлення за статусом
         /// </summary>
         [HttpGet("status/{status}")]
+        [Authorize(Roles = "Admin,User")]
         public async Task<ActionResult<PagedList<OrderResponseDto>>> GetOrdersByStatus(
             string status,
             [FromQuery] int page = 1, 

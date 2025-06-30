@@ -12,9 +12,9 @@ namespace ServiceCenterAppDalEF.Entities
         public int OrderId { get; set; }
         public decimal? Amount { get; set; }
         public DateTime? PaymentDate { get; set; }
-        public string PaymentMethod { get; set; }
+        public string PaymentMethod { get; set; } = string.Empty;
 
-        public Order Order { get; set; }
+        public Order? Order { get; set; }
     }
 
 }
