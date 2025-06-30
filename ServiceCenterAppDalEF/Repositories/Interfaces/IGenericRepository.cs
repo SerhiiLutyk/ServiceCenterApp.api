@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace RepairServiceDAL.Repositories.Interfaces
+namespace ServiceCenterAppDalEF.Repositories.Interfaces
 {
     public interface IGenericRepository<T> where T : class
     {
@@ -17,8 +17,12 @@ namespace RepairServiceDAL.Repositories.Interfaces
         Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate,
                                        CancellationToken cancellationToken = default);
 
+        Task<T?> SingleOrDefaultAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default);
+
         Task AddAsync(T entity, CancellationToken cancellationToken = default);
         void Update(T entity);
         void Delete(T entity);
+
+        Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default);
     }
 }

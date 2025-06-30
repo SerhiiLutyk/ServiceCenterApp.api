@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using RepairServiceDAL.DbCreating;
-using RepairServiceDAL.Repositories;
-using RepairServiceDAL.Repositories.Interfaces;
+using ServiceCenterAppDalEF.DbCreating;
+using ServiceCenterAppDalEF.Repositories;
+using ServiceCenterAppDalEF.Repositories.Interfaces;
 using ServiceCenterAppDalEF.Entities;
 using System.Collections.Generic;
 
@@ -11,11 +11,13 @@ namespace ServiceCenterAppDalEF.Repositories
     {
         public OrderRepository(RepairDbContext context) : base(context) { }
 
-        public async Task<List<Order>> GetByClientIdAsync(int clientId)
+        public async Task<IEnumerable<Order>> GetByClientIdAsync(int clientId)
         {
             return await dbSet
+                .Include(o => o.Client)
+                .Include(o => o.RepairType)
+                .Include(o => o.AdditionalService)
                 .Where(o => o.ClientId == clientId)
-                .OrderByDescending(o => o.OrderDate)
                 .ToListAsync();
         }
     }

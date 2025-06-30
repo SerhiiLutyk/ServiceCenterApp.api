@@ -1,8 +1,9 @@
-﻿using RepairServiceDAL.DbCreating;
-using RepairServiceDAL.Repositories.Interfaces;
+﻿using ServiceCenterAppDalEF.DbCreating;
+using ServiceCenterAppDalEF.Repositories;
+using ServiceCenterAppDalEF.Repositories.Interfaces;
 using ServiceCenterAppDalEF.Entities;
 
-namespace RepairServiceDAL.Repositories
+namespace ServiceCenterAppDalEF.Repositories
 {
     public class RepairTypeRepository : GenericRepository<RepairType>, IRepairTypeRepository
     {

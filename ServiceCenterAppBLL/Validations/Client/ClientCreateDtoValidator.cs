@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
 using ServiceCenterAppBLL.DTO.ClientDto;
 
-namespace ServiceCenterApp.Validations.Client
+namespace ServiceCenterAppBLL.Validations.Client
 {
     public class ClientCreateDtoValidator : AbstractValidator<ClientCreateDto>
     {

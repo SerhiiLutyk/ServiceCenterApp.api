@@ -1,7 +1,8 @@
 ﻿using AutoMapper;
-using BLL.Interfaces;
+using ServiceCenterAppBLL.Interfaces;
 using ServiceCenterAppBLL.DTO.AdditionalServiceDto;
 using ServiceCenterAppBLL.Exceptions;
+using ServiceCenterAppBLL.Pagination;
 using ServiceCenterAppDalEF.Entities;
 using ServiceCenterAppDalEF.Interfaces;
 
@@ -18,12 +19,32 @@ public class AdditionalServiceService : IAdditionalServiceService
         _uow = uow;
     }
 
-    public async Task<IEnumerable<AdditionalServiceResponseDto>> GetAllAsync(CancellationToken ct = default)
-        => _mapper.Map<IEnumerable<AdditionalServiceResponseDto>>(await _uow.AdditionalServices.GetAllAsync(ct));
+    public async Task<PagedList<AdditionalServiceResponseDto>> GetAllAsync(int page = 1, int pageSize = 10, string? searchTerm = null, CancellationToken ct = default)
+    {
+        var query = await _uow.AdditionalServices.GetAllAsync(ct);
+        
+        if (!string.IsNullOrEmpty(searchTerm))
+        {
+            query = query.Where(x => x.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+        }
 
-    public async Task<AdditionalServiceResponseDto> GetByIdAsync(int id, CancellationToken ct = default)
-        => _mapper.Map<AdditionalServiceResponseDto>(
-               await _uow.AdditionalServices.GetByIdAsync(id, ct) ?? throw new NotFoundException("AdditionalService", id));
+        var totalCount = query.Count();
+        var items = query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+
+        var dtos = _mapper.Map<IEnumerable<AdditionalServiceResponseDto>>(items);
+        
+        return new PagedList<AdditionalServiceResponseDto>(dtos.ToList(), totalCount, page, pageSize);
+    }
+
+    public async Task<AdditionalServiceResponseDto?> GetByIdAsync(int id, CancellationToken ct = default)
+    {
+        var entity = await _uow.AdditionalServices.GetByIdAsync(id, ct)
+                     ?? throw new NotFoundException("AdditionalService", id);
+        return _mapper.Map<AdditionalServiceResponseDto>(entity);
+    }
 
     public async Task<AdditionalServiceResponseDto> CreateAsync(AdditionalServiceCreateDto dto, CancellationToken ct = default)
     {
@@ -33,9 +54,11 @@ public class AdditionalServiceService : IAdditionalServiceService
         return _mapper.Map<AdditionalServiceResponseDto>(entity);
     }
 
-    public async Task<AdditionalServiceResponseDto> UpdateAsync(int id, AdditionalServiceUpdateDto dto, CancellationToken ct = default)
+    public async Task<AdditionalServiceResponseDto?> UpdateAsync(int id, AdditionalServiceUpdateDto dto, CancellationToken ct = default)
     {
-        var entity = await _uow.AdditionalServices.GetByIdAsync(id, ct) ?? throw new NotFoundException("AdditionalService", id);
+        var entity = await _uow.AdditionalServices.GetByIdAsync(id, ct)
+                     ?? throw new NotFoundException("AdditionalService", id);
+
         _mapper.Map(dto, entity);
         _uow.AdditionalServices.Update(entity);
         await _uow.SaveAsync(ct);
@@ -50,5 +73,15 @@ public class AdditionalServiceService : IAdditionalServiceService
         _uow.AdditionalServices.Delete(entity);
         await _uow.SaveAsync(ct);
         return true;
+    }
+
+    public async Task<IEnumerable<AdditionalServiceResponseDto>> GetAdditionalServiceOrdersAsync(int id, CancellationToken ct = default)
+    {
+        var entity = await _uow.AdditionalServices.GetByIdAsync(id, ct)
+                     ?? throw new NotFoundException("AdditionalService", id);
+        
+        // Тут можна додати логіку для отримання замовлень для додаткової послуги
+        // Поки що повертаємо порожній список
+        return new List<AdditionalServiceResponseDto>();
     }
 }

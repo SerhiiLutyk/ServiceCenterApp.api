@@ -1,6 +1,6 @@
 ﻿using ServiceCenterAppDalEF.Entities;
 
-namespace RepairServiceDAL.Repositories.Interfaces
+namespace ServiceCenterAppDalEF.Repositories.Interfaces
 {
     public interface IClientRepository : IGenericRepository<Client>
     {

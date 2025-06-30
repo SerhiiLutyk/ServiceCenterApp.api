@@ -1,21 +1,23 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using RepairServiceDAL.DbCreating;
-using RepairServiceDAL.Repositories.Interfaces;
+using ServiceCenterAppDalEF.DbCreating;
+using ServiceCenterAppDalEF.Repositories;
+using ServiceCenterAppDalEF.Repositories.Interfaces;
 using ServiceCenterAppDalEF.Entities;
 using System.Collections.Generic;
+using System.Threading;
 
-namespace RepairServiceDAL.Repositories
+namespace ServiceCenterAppDalEF.Repositories
 {
     public class PaymentRepository : GenericRepository<Payment>, IPaymentRepository
     {
         public PaymentRepository(RepairDbContext context) : base(context) { }
 
-        public async Task<List<Payment>> GetByOrderIdAsync(int orderId)
+        public async Task<IEnumerable<Payment>> GetByOrderIdAsync(int orderId, CancellationToken ct = default)
         {
             return await dbSet
+                .Include(p => p.Order)
                 .Where(p => p.OrderId == orderId)
-                .OrderBy(p => p.PaymentDate)
-                .ToListAsync();
+                .ToListAsync(ct);
         }
     }
 }

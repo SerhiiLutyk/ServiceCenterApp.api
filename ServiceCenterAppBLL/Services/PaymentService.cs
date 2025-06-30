@@ -1,7 +1,8 @@
 ﻿using AutoMapper;
-using BLL.Interfaces;
+using ServiceCenterAppBLL.Interfaces;
 using ServiceCenterAppBLL.DTO.PaymentDto;
 using ServiceCenterAppBLL.Exceptions;
+using ServiceCenterAppBLL.Pagination;
 using ServiceCenterAppDalEF.Entities;
 using ServiceCenterAppDalEF.Interfaces;
 
@@ -18,36 +19,48 @@ public class PaymentService : IPaymentService
         _uow = uow;
     }
 
-    public async Task<IEnumerable<PaymentResponseDto>> GetAllAsync(CancellationToken ct = default)
-        => _mapper.Map<IEnumerable<PaymentResponseDto>>(await _uow.Payments.GetAllAsync(ct));
-
-    public async Task<PaymentResponseDto> GetByIdAsync(int id, CancellationToken ct = default)
-        => _mapper.Map<PaymentResponseDto>(
-               await _uow.Payments.GetByIdAsync(id, ct) ?? throw new NotFoundException("Payment", id));
-
-    public async Task<IEnumerable<PaymentResponseDto>> GetByOrderIdAsync(int orderId, CancellationToken ct = default)
+    public async Task<PagedList<PaymentResponseDto>> GetAllAsync(int page = 1, int pageSize = 10, DateTime? fromDate = null, DateTime? toDate = null, string? paymentMethod = null, CancellationToken ct = default)
     {
-        if (await _uow.Orders.GetByIdAsync(orderId, ct) is null)
-            throw new NotFoundException("Order", orderId);
+        var query = await _uow.Payments.GetAllAsync(ct);
+        
+        if (fromDate.HasValue)
+            query = query.Where(p => p.PaymentDate >= fromDate);
+        
+        if (toDate.HasValue)
+            query = query.Where(p => p.PaymentDate <= toDate);
+        
+        if (!string.IsNullOrEmpty(paymentMethod))
+            query = query.Where(p => p.PaymentMethod == paymentMethod);
 
-        var list = await _uow.Payments.GetByOrderIdAsync(orderId);
-        return _mapper.Map<IEnumerable<PaymentResponseDto>>(list);
+        var totalCount = query.Count();
+        var items = query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+
+        var dtos = _mapper.Map<IEnumerable<PaymentResponseDto>>(items);
+        
+        return new PagedList<PaymentResponseDto>(dtos.ToList(), totalCount, page, pageSize);
+    }
+
+    public async Task<PaymentResponseDto?> GetByIdAsync(int id, CancellationToken ct = default)
+    {
+        var entity = await _uow.Payments.GetByIdAsync(id, ct)
+                     ?? throw new NotFoundException("Payment", id);
+        return _mapper.Map<PaymentResponseDto>(entity);
     }
 
     public async Task<PaymentResponseDto> CreateAsync(PaymentCreateDto dto, CancellationToken ct = default)
     {
-        if (await _uow.Orders.GetByIdAsync(dto.OrderId, ct) is null)
-            throw new ValidationException($"Order {dto.OrderId} not exists.");
-
         var entity = _mapper.Map<Payment>(dto);
         entity.PaymentDate = DateTime.UtcNow;
-
+        
         await _uow.Payments.AddAsync(entity, ct);
         await _uow.SaveAsync(ct);
         return _mapper.Map<PaymentResponseDto>(entity);
     }
 
-    public async Task<PaymentResponseDto> UpdateAsync(int id, PaymentUpdateDto dto, CancellationToken ct = default)
+    public async Task<PaymentResponseDto?> UpdateAsync(int id, PaymentUpdateDto dto, CancellationToken ct = default)
     {
         var entity = await _uow.Payments.GetByIdAsync(id, ct)
                      ?? throw new NotFoundException("Payment", id);
@@ -66,5 +79,78 @@ public class PaymentService : IPaymentService
         _uow.Payments.Delete(entity);
         await _uow.SaveAsync(ct);
         return true;
+    }
+
+    public async Task<IEnumerable<PaymentResponseDto>> GetPaymentsByOrderAsync(int orderId, CancellationToken ct = default)
+    {
+        var payments = await _uow.Payments.GetByOrderIdAsync(orderId, ct);
+        return _mapper.Map<IEnumerable<PaymentResponseDto>>(payments);
+    }
+
+    public async Task<object> GetPaymentStatisticsAsync(DateTime? fromDate = null, DateTime? toDate = null, CancellationToken ct = default)
+    {
+        var query = await _uow.Payments.GetAllAsync(ct);
+        
+        if (fromDate.HasValue)
+            query = query.Where(p => p.PaymentDate >= fromDate);
+        
+        if (toDate.HasValue)
+            query = query.Where(p => p.PaymentDate <= toDate);
+        
+        var statistics = new
+        {
+            TotalPayments = query.Count(),
+            TotalAmount = query.Sum(p => p.Amount ?? 0),
+            AverageAmount = query.Any() ? query.Average(p => p.Amount ?? 0) : 0,
+            PaymentsByMethod = query.GroupBy(p => p.PaymentMethod).Select(g => new { Method = g.Key, Count = g.Count(), Amount = g.Sum(p => p.Amount ?? 0) })
+        };
+        
+        return statistics;
+    }
+
+    public async Task<decimal> GetTotalRevenueAsync(DateTime? fromDate = null, DateTime? toDate = null, CancellationToken ct = default)
+    {
+        var query = await _uow.Payments.GetAllAsync(ct);
+        
+        if (fromDate.HasValue)
+            query = query.Where(p => p.PaymentDate >= fromDate);
+        
+        if (toDate.HasValue)
+            query = query.Where(p => p.PaymentDate <= toDate);
+        
+        return query.Sum(p => p.Amount ?? 0);
+    }
+
+    public async Task<object> GetRevenueReportAsync(DateTime fromDate, DateTime toDate, string? groupBy = "day", CancellationToken ct = default)
+    {
+        var query = await _uow.Payments.GetAllAsync(ct);
+        query = query.Where(p => p.PaymentDate >= fromDate && p.PaymentDate <= toDate);
+        
+        var report = new
+        {
+            TotalRevenue = query.Sum(p => p.Amount ?? 0),
+            TotalPayments = query.Count(),
+            RevenueByMethod = query.GroupBy(p => p.PaymentMethod).Select(g => new { Method = g.Key, Count = g.Count(), Amount = g.Sum(p => p.Amount ?? 0) })
+        };
+        
+        return report;
+    }
+
+    public async Task<object> GetPaymentMethodsReportAsync(DateTime? fromDate = null, DateTime? toDate = null, CancellationToken ct = default)
+    {
+        var query = await _uow.Payments.GetAllAsync(ct);
+        
+        if (fromDate.HasValue)
+            query = query.Where(p => p.PaymentDate >= fromDate);
+        
+        if (toDate.HasValue)
+            query = query.Where(p => p.PaymentDate <= toDate);
+        
+        var report = query
+            .GroupBy(p => p.PaymentMethod)
+            .Select(g => new { Method = g.Key, Count = g.Count(), Amount = g.Sum(p => p.Amount ?? 0) })
+            .OrderByDescending(x => x.Amount);
+        
+        return report;
     }
 }

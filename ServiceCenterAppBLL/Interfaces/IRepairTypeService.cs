@@ -1,13 +1,15 @@
 ﻿using ServiceCenterAppBLL.DTO.RepairTypeDto;
+using ServiceCenterAppBLL.Pagination;
 
-namespace BLL.Interfaces
+namespace ServiceCenterAppBLL.Interfaces
 {
     public interface IRepairTypeService
     {
-        Task<IEnumerable<RepairTypeResponseDto>> GetAllAsync(CancellationToken cancellationToken = default);
+        Task<PagedList<RepairTypeResponseDto>> GetAllAsync(int page = 1, int pageSize = 10, string? searchTerm = null, CancellationToken cancellationToken = default);
         Task<RepairTypeResponseDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
         Task<RepairTypeResponseDto> CreateAsync(RepairTypeCreateDto dto, CancellationToken cancellationToken = default);
         Task<RepairTypeResponseDto?> UpdateAsync(int id, RepairTypeUpdateDto dto, CancellationToken cancellationToken = default);
         Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default);
+        Task<IEnumerable<RepairTypeResponseDto>> GetRepairTypeOrdersAsync(int id, CancellationToken cancellationToken = default);
     }
 }

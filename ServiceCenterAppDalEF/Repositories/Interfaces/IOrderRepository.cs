@@ -1,9 +1,9 @@
 ﻿using ServiceCenterAppDalEF.Entities;
 
-namespace RepairServiceDAL.Repositories.Interfaces
+namespace ServiceCenterAppDalEF.Repositories.Interfaces
 {
     public interface IOrderRepository : IGenericRepository<Order>
     {
-        Task<List<Order>> GetByClientIdAsync(int clientId);
+        Task<IEnumerable<Order>> GetByClientIdAsync(int clientId);
     }
 }

@@ -1,9 +1,9 @@
 ﻿using ServiceCenterAppDalEF.Entities;
 
-namespace RepairServiceDAL.Repositories.Interfaces
+namespace ServiceCenterAppDalEF.Repositories.Interfaces
 {
     public interface IPaymentRepository : IGenericRepository<Payment>
     {
-        Task<List<Payment>> GetByOrderIdAsync(int orderId);
+        Task<IEnumerable<Payment>> GetByOrderIdAsync(int orderId, CancellationToken ct = default);
     }
 }

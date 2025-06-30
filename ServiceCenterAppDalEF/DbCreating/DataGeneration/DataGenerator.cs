@@ -1,14 +1,16 @@
-﻿namespace RepairServiceDAL.DbCreating.DataGeneration
+﻿using ServiceCenterAppDalEF.DbCreating;
+
+namespace ServiceCenterAppDalEF.DbCreating.DataGeneration
 {
-    public static class DataGenerator
+    public class DataGenerator
     {
-        public static void Initialize(RepairDbContext context)
+        public static void GenerateAll(RepairDbContext context)
         {
             var clients = ClientGeneration.Generate(context);
             var repairTypes = RepairTypeGeneration.Generate(context);
-            var services = AdditionalServiceGeneration.Generate(context);
-            var orders = OrderGeneration.Generate(context, clients, repairTypes, services);
-            var payments = PaymentGeneration.Generate(context, orders);
+            var additionalServices = AdditionalServiceGeneration.Generate(context);
+            var orders = OrderGeneration.Generate(context, clients, repairTypes, additionalServices);
+            PaymentGeneration.Generate(context, orders);
         }
     }
 }

@@ -1,7 +1,7 @@
-﻿using Bogus;
-using ServiceCenterAppDalEF.Entities;
+﻿using ServiceCenterAppDalEF.Entities;
+using ServiceCenterAppDalEF.DbCreating;
 
-namespace RepairServiceDAL.DbCreating.DataGeneration
+namespace ServiceCenterAppDalEF.DbCreating.DataGeneration
 {
     public class AdditionalServiceGeneration
     {
@@ -9,17 +9,16 @@ namespace RepairServiceDAL.DbCreating.DataGeneration
         {
             if (context.AdditionalServices.Any()) return context.AdditionalServices.ToList();
 
-            var names = new[] {
-                "Express Repair", "Cleaning", "Diagnostics", "Data Backup"
+            var services = new List<AdditionalService>
+            {
+                new AdditionalService { Name = "Чистка від пилу", Price = 200 },
+                new AdditionalService { Name = "Заміна термопасти", Price = 300 },
+                new AdditionalService { Name = "Встановлення додаткового ПО", Price = 150 },
+                new AdditionalService { Name = "Резервне копіювання даних", Price = 250 },
+                new AdditionalService { Name = "Налаштування мережі", Price = 180 }
             };
 
-            var services = names.Select(name => new AdditionalService
-            {
-                Name = name,
-                Price = new Faker().Random.Decimal(100, 800)
-            }).ToList();
-
-            context.AddRange(services);
+            context.AdditionalServices.AddRange(services);
             context.SaveChanges();
             return services;
         }

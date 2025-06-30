@@ -1,57 +1,74 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using RepairServiceDAL.Repositories.Interfaces;
+using ServiceCenterAppDalEF.DbCreating;
+using ServiceCenterAppDalEF.Repositories.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Threading;
 using System.Threading.Tasks;
 
-namespace RepairServiceDAL.Repositories
+namespace ServiceCenterAppDalEF.Repositories
 {
     public class GenericRepository<T> : IGenericRepository<T> where T : class
     {
-        protected readonly RepairDbContext _context;
+        protected readonly RepairDbContext context;
         protected readonly DbSet<T> dbSet;
 
         public GenericRepository(RepairDbContext context)
         {
-            _context = context;
-            dbSet = _context.Set<T>();
+            this.context = context;
+            this.dbSet = context.Set<T>();
         }
 
-        public async Task<IEnumerable<T>> GetAllAsync()
+        public virtual IQueryable<T> GetAll()
         {
-            return await dbSet.ToListAsync();
+            return dbSet.AsQueryable();
         }
 
-        public async Task<T?> GetByIdAsync(int id)
+        public virtual async Task<IEnumerable<T>> GetAllAsync(CancellationToken cancellationToken = default)
         {
-            return await dbSet.FindAsync(id);
+            return await dbSet.ToListAsync(cancellationToken);
         }
 
-        public async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate)
+        public virtual async Task<T?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
         {
-            return await dbSet.Where(predicate).ToListAsync();
+            return await dbSet.FindAsync(new object[] { id }, cancellationToken);
         }
 
-        public async Task AddAsync(T entity)
+        public virtual async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default)
         {
-            await dbSet.AddAsync(entity);
+            return await dbSet.Where(predicate).ToListAsync(cancellationToken);
         }
 
-        public void Update(T entity)
+        public virtual async Task<T?> SingleOrDefaultAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default)
+        {
+            return await dbSet.SingleOrDefaultAsync(predicate, cancellationToken);
+        }
+
+        public virtual async Task AddAsync(T entity, CancellationToken cancellationToken = default)
+        {
+            await dbSet.AddAsync(entity, cancellationToken);
+        }
+
+        public virtual void Update(T entity)
         {
             dbSet.Update(entity);
         }
 
-        public void Delete(T entity)
+        public virtual void Delete(T entity)
         {
             dbSet.Remove(entity);
         }
 
+        public virtual async Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default)
+        {
+            return await dbSet.AnyAsync(predicate, cancellationToken);
+        }
+
         public async Task SaveChangesAsync()
         {
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
         }
     }
 }

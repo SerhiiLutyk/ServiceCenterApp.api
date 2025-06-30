@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using RepairServiceDAL.Repositories.Interfaces;
+using ServiceCenterAppDalEF.Repositories.Interfaces;
 
 namespace ServiceCenterAppDalEF.Interfaces
 {

@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using RepairServiceDAL.DbCreating;
-using RepairServiceDAL.Repositories;
-using RepairServiceDAL.Repositories.Interfaces;
+using ServiceCenterAppDalEF.DbCreating;
+using ServiceCenterAppDalEF.Repositories;
+using ServiceCenterAppDalEF.Repositories.Interfaces;
 using ServiceCenterAppDalEF.Entities;
 using System.Collections.Generic;
 

@@ -1,7 +1,7 @@
-﻿using Bogus;
-using ServiceCenterAppDalEF.Entities;
+﻿using ServiceCenterAppDalEF.Entities;
+using ServiceCenterAppDalEF.DbCreating;
 
-namespace RepairServiceDAL.DbCreating.DataGeneration
+namespace ServiceCenterAppDalEF.DbCreating.DataGeneration
 {
     public class RepairTypeGeneration
     {
@@ -9,16 +9,15 @@ namespace RepairServiceDAL.DbCreating.DataGeneration
         {
             if (context.RepairTypes.Any()) return context.RepairTypes.ToList();
 
-            var names = new[] {
-                "Screen Replacement", "Battery Swap", "Board Repair",
-                "Water Damage Cleanup", "Camera Fix", "Software Flash"
-            };
-
-            var repairTypes = names.Select(name => new RepairType
+            var repairTypes = new List<RepairType>
             {
-                Name = name,
-                Price = new Faker().Random.Decimal(500, 2500)
-            }).ToList();
+                new RepairType { Name = "Ремонт ноутбука", Price = 500 },
+                new RepairType { Name = "Ремонт комп'ютера", Price = 400 },
+                new RepairType { Name = "Ремонт принтера", Price = 300 },
+                new RepairType { Name = "Ремонт монітора", Price = 250 },
+                new RepairType { Name = "Ремонт планшета", Price = 350 },
+                new RepairType { Name = "Ремонт смартфона", Price = 450 }
+            };
 
             context.RepairTypes.AddRange(repairTypes);
             context.SaveChanges();

@@ -1,7 +1,7 @@
-﻿using Bogus;
-using ServiceCenterAppDalEF.Entities;
+﻿using ServiceCenterAppDalEF.Entities;
+using ServiceCenterAppDalEF.DbCreating;
 
-namespace RepairServiceDAL.DbCreating.DataGeneration
+namespace ServiceCenterAppDalEF.DbCreating.DataGeneration
 {
     public class PaymentGeneration
     {
@@ -9,18 +9,20 @@ namespace RepairServiceDAL.DbCreating.DataGeneration
         {
             if (context.Payments.Any()) return context.Payments.ToList();
 
-            var faker = new Faker("uk");
             var payments = new List<Payment>();
+            var random = new Random();
+            var paymentMethods = new[] { "Cash", "Card", "Bank Transfer" };
 
-            foreach (var order in orders)
+            foreach (var order in orders.Where(o => o.Status == "Completed"))
             {
-                payments.Add(new Payment
+                var payment = new Payment
                 {
                     OrderId = order.OrderId,
-                    Amount = faker.Random.Decimal(700, 3000),
-                    PaymentDate = order.OrderDate?.AddDays(1),
-                    PaymentMethod = faker.PickRandom(new[] { "Card", "Cash" })
-                });
+                    Amount = random.Next(200, 1000),
+                    PaymentDate = order.OrderDate.Value.AddDays(random.Next(1, 7)),
+                    PaymentMethod = paymentMethods[random.Next(paymentMethods.Length)]
+                };
+                payments.Add(payment);
             }
 
             context.Payments.AddRange(payments);

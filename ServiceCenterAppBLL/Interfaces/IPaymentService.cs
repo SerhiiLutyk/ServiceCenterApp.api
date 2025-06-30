@@ -1,14 +1,19 @@
 ﻿using ServiceCenterAppBLL.DTO.PaymentDto;
+using ServiceCenterAppBLL.Pagination;
 
-namespace BLL.Interfaces
+namespace ServiceCenterAppBLL.Interfaces
 {
     public interface IPaymentService
     {
-        Task<IEnumerable<PaymentResponseDto>> GetAllAsync(CancellationToken cancellationToken = default);
+        Task<PagedList<PaymentResponseDto>> GetAllAsync(int page = 1, int pageSize = 10, DateTime? fromDate = null, DateTime? toDate = null, string? paymentMethod = null, CancellationToken cancellationToken = default);
         Task<PaymentResponseDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
         Task<PaymentResponseDto> CreateAsync(PaymentCreateDto dto, CancellationToken cancellationToken = default);
         Task<PaymentResponseDto?> UpdateAsync(int id, PaymentUpdateDto dto, CancellationToken cancellationToken = default);
         Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default);
-        Task<IEnumerable<PaymentResponseDto>> GetByOrderIdAsync(int orderId, CancellationToken cancellationToken = default);
+        Task<IEnumerable<PaymentResponseDto>> GetPaymentsByOrderAsync(int orderId, CancellationToken cancellationToken = default);
+        Task<object> GetPaymentStatisticsAsync(DateTime? fromDate = null, DateTime? toDate = null, CancellationToken cancellationToken = default);
+        Task<decimal> GetTotalRevenueAsync(DateTime? fromDate = null, DateTime? toDate = null, CancellationToken cancellationToken = default);
+        Task<object> GetRevenueReportAsync(DateTime fromDate, DateTime toDate, string? groupBy = "day", CancellationToken cancellationToken = default);
+        Task<object> GetPaymentMethodsReportAsync(DateTime? fromDate = null, DateTime? toDate = null, CancellationToken cancellationToken = default);
     }
 }

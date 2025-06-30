@@ -1,7 +1,8 @@
 ﻿using Bogus;
 using ServiceCenterAppDalEF.Entities;
+using ServiceCenterAppDalEF.DbCreating;
 
-namespace RepairServiceDAL.DbCreating.DataGeneration
+namespace ServiceCenterAppDalEF.DbCreating.DataGeneration
 {
     public class ClientGeneration
     {

@@ -1,7 +1,8 @@
 ﻿using AutoMapper;
-using BLL.Interfaces;
+using ServiceCenterAppBLL.Interfaces;
 using ServiceCenterAppBLL.DTO.OrderDto;
 using ServiceCenterAppBLL.Exceptions;
+using ServiceCenterAppBLL.Pagination;
 using ServiceCenterAppDalEF.Entities;
 using ServiceCenterAppDalEF.Interfaces;
 
@@ -18,10 +19,31 @@ public class OrderService : IOrderService
         _uow = uow;
     }
 
-    public async Task<IEnumerable<OrderResponseDto>> GetAllAsync(CancellationToken ct = default)
-        => _mapper.Map<IEnumerable<OrderResponseDto>>(await _uow.Orders.GetAllAsync(ct));
+    public async Task<PagedList<OrderResponseDto>> GetAllAsync(int page = 1, int pageSize = 10, string? status = null, DateTime? fromDate = null, DateTime? toDate = null, CancellationToken ct = default)
+    {
+        var query = await _uow.Orders.GetAllAsync(ct);
+        
+        if (!string.IsNullOrEmpty(status))
+            query = query.Where(o => o.Status == status);
+        
+        if (fromDate.HasValue)
+            query = query.Where(o => o.OrderDate >= fromDate);
+        
+        if (toDate.HasValue)
+            query = query.Where(o => o.OrderDate <= toDate);
 
-    public async Task<OrderResponseDto> GetByIdAsync(int id, CancellationToken ct = default)
+        var totalCount = query.Count();
+        var items = query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+
+        var dtos = _mapper.Map<IEnumerable<OrderResponseDto>>(items);
+        
+        return new PagedList<OrderResponseDto>(dtos.ToList(), totalCount, page, pageSize);
+    }
+
+    public async Task<OrderResponseDto?> GetByIdAsync(int id, CancellationToken ct = default)
     {
         var entity = await _uow.Orders.GetByIdAsync(id, ct)
                      ?? throw new NotFoundException("Order", id);
@@ -39,7 +61,7 @@ public class OrderService : IOrderService
         ValidateRelated(dto.ClientId, dto.RepairTypeId, dto.AdditionalServiceId);
 
         var entity = _mapper.Map<Order>(dto);
-        entity.Status = "New";
+        entity.Status = "Pending";
         entity.OrderDate = DateTime.UtcNow;
 
         await _uow.Orders.AddAsync(entity, ct);
@@ -47,7 +69,7 @@ public class OrderService : IOrderService
         return _mapper.Map<OrderResponseDto>(entity);
     }
 
-    public async Task<OrderResponseDto> UpdateAsync(int id, OrderUpdateDto dto, CancellationToken ct = default)
+    public async Task<OrderResponseDto?> UpdateAsync(int id, OrderUpdateDto dto, CancellationToken ct = default)
     {
         var entity = await _uow.Orders.GetByIdAsync(id, ct)
                      ?? throw new NotFoundException("Order", id);
@@ -72,6 +94,134 @@ public class OrderService : IOrderService
         _uow.Orders.Delete(entity);
         await _uow.SaveAsync(ct);
         return true;
+    }
+
+    public async Task<IEnumerable<OrderResponseDto>> GetOrderPaymentsAsync(int id, CancellationToken ct = default)
+    {
+        var entity = await _uow.Orders.GetByIdAsync(id, ct)
+                     ?? throw new NotFoundException("Order", id);
+        
+        // Тут можна додати логіку для отримання платежів замовлення
+        return new List<OrderResponseDto>();
+    }
+
+    public async Task<OrderResponseDto?> UpdateStatusAsync(int id, string status, CancellationToken ct = default)
+    {
+        var entity = await _uow.Orders.GetByIdAsync(id, ct)
+                     ?? throw new NotFoundException("Order", id);
+
+        entity.Status = status;
+        _uow.Orders.Update(entity);
+        await _uow.SaveAsync(ct);
+        return _mapper.Map<OrderResponseDto>(entity);
+    }
+
+    public async Task<PagedList<OrderResponseDto>> GetByStatusAsync(string status, int page = 1, int pageSize = 10, CancellationToken ct = default)
+    {
+        var query = await _uow.Orders.GetAllAsync(ct);
+        query = query.Where(o => o.Status == status);
+
+        var totalCount = query.Count();
+        var items = query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+
+        var dtos = _mapper.Map<IEnumerable<OrderResponseDto>>(items);
+        
+        return new PagedList<OrderResponseDto>(dtos.ToList(), totalCount, page, pageSize);
+    }
+
+    public async Task<int> GetTotalOrdersCountAsync(DateTime? fromDate = null, DateTime? toDate = null, CancellationToken ct = default)
+    {
+        var query = await _uow.Orders.GetAllAsync(ct);
+        
+        if (fromDate.HasValue)
+            query = query.Where(o => o.OrderDate >= fromDate);
+        
+        if (toDate.HasValue)
+            query = query.Where(o => o.OrderDate <= toDate);
+        
+        return query.Count();
+    }
+
+    public async Task<int> GetCompletedOrdersCountAsync(DateTime? fromDate = null, DateTime? toDate = null, CancellationToken ct = default)
+    {
+        var query = await _uow.Orders.GetAllAsync(ct);
+        query = query.Where(o => o.Status == "Completed");
+        
+        if (fromDate.HasValue)
+            query = query.Where(o => o.OrderDate >= fromDate);
+        
+        if (toDate.HasValue)
+            query = query.Where(o => o.OrderDate <= toDate);
+        
+        return query.Count();
+    }
+
+    public async Task<int> GetPendingOrdersCountAsync(DateTime? fromDate = null, DateTime? toDate = null, CancellationToken ct = default)
+    {
+        var query = await _uow.Orders.GetAllAsync(ct);
+        query = query.Where(o => o.Status == "Pending");
+        
+        if (fromDate.HasValue)
+            query = query.Where(o => o.OrderDate >= fromDate);
+        
+        if (toDate.HasValue)
+            query = query.Where(o => o.OrderDate <= toDate);
+        
+        return query.Count();
+    }
+
+    public async Task<decimal> GetAverageOrderValueAsync(DateTime? fromDate = null, DateTime? toDate = null, CancellationToken ct = default)
+    {
+        var query = await _uow.Orders.GetAllAsync(ct);
+        
+        if (fromDate.HasValue)
+            query = query.Where(o => o.OrderDate >= fromDate);
+        
+        if (toDate.HasValue)
+            query = query.Where(o => o.OrderDate <= toDate);
+        
+        // Тут можна додати логіку для розрахунку середньої вартості замовлення
+        return query.Any() ? 0 : 0;
+    }
+
+    public async Task<object> GetOrdersReportAsync(DateTime fromDate, DateTime toDate, string? status = null, CancellationToken ct = default)
+    {
+        var query = await _uow.Orders.GetAllAsync(ct);
+        query = query.Where(o => o.OrderDate >= fromDate && o.OrderDate <= toDate);
+        
+        if (!string.IsNullOrEmpty(status))
+            query = query.Where(o => o.Status == status);
+        
+        var report = new
+        {
+            TotalOrders = query.Count(),
+            OrdersByStatus = query.GroupBy(o => o.Status).Select(g => new { Status = g.Key, Count = g.Count() }),
+            AverageOrdersPerDay = query.Any() ? query.Count() / (toDate - fromDate).Days : 0
+        };
+        
+        return report;
+    }
+
+    public async Task<object> GetPopularRepairTypesReportAsync(DateTime? fromDate = null, DateTime? toDate = null, int top = 10, CancellationToken ct = default)
+    {
+        var query = await _uow.Orders.GetAllAsync(ct);
+        
+        if (fromDate.HasValue)
+            query = query.Where(o => o.OrderDate >= fromDate);
+        
+        if (toDate.HasValue)
+            query = query.Where(o => o.OrderDate <= toDate);
+        
+        var popularTypes = query
+            .GroupBy(o => o.RepairTypeId)
+            .Select(g => new { RepairTypeId = g.Key, Count = g.Count() })
+            .OrderByDescending(x => x.Count)
+            .Take(top);
+        
+        return popularTypes;
     }
 
     /* helpers */

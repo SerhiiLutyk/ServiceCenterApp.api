@@ -1,14 +1,14 @@
-﻿using RepairServiceDAL.Repositories;
-using RepairServiceDAL.Repositories.Interfaces;
+﻿using ServiceCenterAppDalEF.Repositories;
+using ServiceCenterAppDalEF.Repositories.Interfaces;
 using ServiceCenterAppDalEF.Interfaces;
-using ServiceCenterAppDalEF.Repositories;
+using ServiceCenterAppDalEF.DbCreating;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RepairServiceDAL.UoW
+namespace ServiceCenterAppDalEF.UnitOfWork
 {
     public class UnitOfWork : IUnitOfWork
     {

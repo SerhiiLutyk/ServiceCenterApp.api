@@ -1,33 +1,38 @@
-﻿using Bogus;
-using ServiceCenterAppDalEF.Entities;
+﻿using ServiceCenterAppDalEF.Entities;
+using ServiceCenterAppDalEF.DbCreating;
 
-namespace RepairServiceDAL.DbCreating.DataGeneration
+namespace ServiceCenterAppDalEF.DbCreating.DataGeneration
 {
     public class OrderGeneration
     {
-        public static List<Order> Generate(
-            RepairDbContext context,
-            List<Client> clients,
-            List<RepairType> repairTypes,
-            List<AdditionalService> services)
+        public static List<Order> Generate(RepairDbContext context, List<Client> clients, List<RepairType> repairTypes, List<AdditionalService> additionalServices)
         {
             if (context.Orders.Any()) return context.Orders.ToList();
 
-            var faker = new Faker("uk");
             var orders = new List<Order>();
             var random = new Random();
 
-            for (int i = 0; i < 15; i++)
+            foreach (var client in clients)
             {
-                orders.Add(new Order
+                var orderCount = random.Next(1, 4);
+                for (int i = 0; i < orderCount; i++)
                 {
-                    ClientId = faker.PickRandom(clients).ClientId,
-                    RepairTypeId = faker.PickRandom(repairTypes).RepairTypeId,
-                    AdditionalServiceId = faker.PickRandom(services).ServiceId,
-                    OrderDate = faker.Date.Recent(14),
-                    Status = faker.PickRandom(new[] { "In Progress", "Done", "Waiting" }),
-                    Description = faker.Lorem.Sentence()
-                });
+                    var order = new Order
+                    {
+                        ClientId = client.ClientId,
+                        OrderDate = DateTime.UtcNow.AddDays(-random.Next(1, 30)),
+                        Status = random.Next(0, 3) switch
+                        {
+                            0 => "Pending",
+                            1 => "In Progress",
+                            _ => "Completed"
+                        },
+                        Description = $"Ремонт техніки для клієнта {client.FirstName}",
+                        RepairTypeId = repairTypes[random.Next(repairTypes.Count)].RepairTypeId,
+                        AdditionalServiceId = random.Next(0, 2) == 1 ? additionalServices[random.Next(additionalServices.Count)].ServiceId : null
+                    };
+                    orders.Add(order);
+                }
             }
 
             context.Orders.AddRange(orders);

@@ -1,7 +1,8 @@
 ﻿using AutoMapper;
-using BLL.Interfaces;
+using ServiceCenterAppBLL.Interfaces;
 using ServiceCenterAppBLL.DTO.RepairTypeDto;
 using ServiceCenterAppBLL.Exceptions;
+using ServiceCenterAppBLL.Pagination;
 using ServiceCenterAppDalEF.Entities;
 using ServiceCenterAppDalEF.Interfaces;
 
@@ -18,12 +19,32 @@ public class RepairTypeService : IRepairTypeService
         _uow = uow;
     }
 
-    public async Task<IEnumerable<RepairTypeResponseDto>> GetAllAsync(CancellationToken ct = default)
-        => _mapper.Map<IEnumerable<RepairTypeResponseDto>>(await _uow.RepairTypes.GetAllAsync(ct));
+    public async Task<PagedList<RepairTypeResponseDto>> GetAllAsync(int page = 1, int pageSize = 10, string? searchTerm = null, CancellationToken ct = default)
+    {
+        var query = await _uow.RepairTypes.GetAllAsync(ct);
+        
+        if (!string.IsNullOrEmpty(searchTerm))
+        {
+            query = query.Where(x => x.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+        }
 
-    public async Task<RepairTypeResponseDto> GetByIdAsync(int id, CancellationToken ct = default)
-        => _mapper.Map<RepairTypeResponseDto>(
-               await _uow.RepairTypes.GetByIdAsync(id, ct) ?? throw new NotFoundException("RepairType", id));
+        var totalCount = query.Count();
+        var items = query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+
+        var dtos = _mapper.Map<IEnumerable<RepairTypeResponseDto>>(items);
+        
+        return new PagedList<RepairTypeResponseDto>(dtos.ToList(), totalCount, page, pageSize);
+    }
+
+    public async Task<RepairTypeResponseDto?> GetByIdAsync(int id, CancellationToken ct = default)
+    {
+        var entity = await _uow.RepairTypes.GetByIdAsync(id, ct)
+                     ?? throw new NotFoundException("RepairType", id);
+        return _mapper.Map<RepairTypeResponseDto>(entity);
+    }
 
     public async Task<RepairTypeResponseDto> CreateAsync(RepairTypeCreateDto dto, CancellationToken ct = default)
     {
@@ -33,9 +54,11 @@ public class RepairTypeService : IRepairTypeService
         return _mapper.Map<RepairTypeResponseDto>(entity);
     }
 
-    public async Task<RepairTypeResponseDto> UpdateAsync(int id, RepairTypeUpdateDto dto, CancellationToken ct = default)
+    public async Task<RepairTypeResponseDto?> UpdateAsync(int id, RepairTypeUpdateDto dto, CancellationToken ct = default)
     {
-        var entity = await _uow.RepairTypes.GetByIdAsync(id, ct) ?? throw new NotFoundException("RepairType", id);
+        var entity = await _uow.RepairTypes.GetByIdAsync(id, ct)
+                     ?? throw new NotFoundException("RepairType", id);
+
         _mapper.Map(dto, entity);
         _uow.RepairTypes.Update(entity);
         await _uow.SaveAsync(ct);
@@ -50,5 +73,15 @@ public class RepairTypeService : IRepairTypeService
         _uow.RepairTypes.Delete(entity);
         await _uow.SaveAsync(ct);
         return true;
+    }
+
+    public async Task<IEnumerable<RepairTypeResponseDto>> GetRepairTypeOrdersAsync(int id, CancellationToken ct = default)
+    {
+        var entity = await _uow.RepairTypes.GetByIdAsync(id, ct)
+                     ?? throw new NotFoundException("RepairType", id);
+        
+        // Тут можна додати логіку для отримання замовлень для конкретного типу ремонту
+        // Поки що повертаємо порожній список
+        return new List<RepairTypeResponseDto>();
     }
 }
