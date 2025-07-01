@@ -5,7 +5,7 @@ namespace ServiceCenterAppBLL.Interfaces
 {
     public interface IPaymentService
     {
-        Task<PagedList<PaymentResponseDto>> GetAllAsync(int page = 1, int pageSize = 10, DateTime? fromDate = null, DateTime? toDate = null, string? paymentMethod = null, CancellationToken cancellationToken = default);
+        Task<PagedList<PaymentResponseDto>> GetAllAsync(int page = 1, int pageSize = 10, DateTime? fromDate = null, DateTime? toDate = null, string? paymentMethod = null, string? sortBy = null, string? sortOrder = "asc", CancellationToken cancellationToken = default);
         Task<PaymentResponseDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
         Task<PaymentResponseDto> CreateAsync(PaymentCreateDto dto, CancellationToken cancellationToken = default);
         Task<PaymentResponseDto?> UpdateAsync(int id, PaymentUpdateDto dto, CancellationToken cancellationToken = default);

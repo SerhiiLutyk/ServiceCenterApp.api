@@ -30,9 +30,11 @@ namespace ServiceCenterApp.Controllers
             [FromQuery] int pageSize = 10,
             [FromQuery] string? status = null,
             [FromQuery] DateTime? fromDate = null,
-            [FromQuery] DateTime? toDate = null)
+            [FromQuery] DateTime? toDate = null,
+            [FromQuery] string? sortBy = null,
+            [FromQuery] string? sortOrder = "asc")
         {
-            var orders = await _orderService.GetAllAsync(page, pageSize, status, fromDate, toDate);
+            var orders = await _orderService.GetAllAsync(page, pageSize, status, fromDate, toDate, sortBy, sortOrder);
             return Ok(orders);
         }
 

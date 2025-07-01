@@ -19,7 +19,7 @@ public class RepairTypeService : IRepairTypeService
         _uow = uow;
     }
 
-    public async Task<PagedList<RepairTypeResponseDto>> GetAllAsync(int page = 1, int pageSize = 10, string? searchTerm = null, CancellationToken ct = default)
+    public async Task<PagedList<RepairTypeResponseDto>> GetAllAsync(int page = 1, int pageSize = 10, string? searchTerm = null, string? sortBy = null, string? sortOrder = "asc", CancellationToken ct = default)
     {
         var query = await _uow.RepairTypes.GetAllAsync(ct);
         
@@ -31,6 +31,24 @@ public class RepairTypeService : IRepairTypeService
                 x.Name.ToLower().Contains(searchTerm.ToLower())
                 || (isId && x.RepairTypeId == idValue)
             );
+        }
+
+        // Сортування
+        if (!string.IsNullOrEmpty(sortBy))
+        {
+            switch (sortBy.ToLower())
+            {
+                case "name":
+                    query = sortOrder == "desc" ? query.OrderByDescending(x => x.Name) : query.OrderBy(x => x.Name);
+                    break;
+                default:
+                    query = query.OrderBy(x => x.RepairTypeId);
+                    break;
+            }
+        }
+        else
+        {
+            query = query.OrderBy(x => x.RepairTypeId);
         }
 
         var totalCount = query.Count();

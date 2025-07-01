@@ -30,9 +30,11 @@ namespace ServiceCenterApp.Controllers
             [FromQuery] int pageSize = 10,
             [FromQuery] DateTime? fromDate = null,
             [FromQuery] DateTime? toDate = null,
-            [FromQuery] string? paymentMethod = null)
+            [FromQuery] string? paymentMethod = null,
+            [FromQuery] string? sortBy = null,
+            [FromQuery] string? sortOrder = "asc")
         {
-            var payments = await _paymentService.GetAllAsync(page, pageSize, fromDate, toDate, paymentMethod);
+            var payments = await _paymentService.GetAllAsync(page, pageSize, fromDate, toDate, paymentMethod, sortBy, sortOrder);
             return Ok(payments);
         }
 

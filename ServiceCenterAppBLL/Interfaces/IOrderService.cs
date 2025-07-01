@@ -5,7 +5,7 @@ namespace ServiceCenterAppBLL.Interfaces
 {
     public interface IOrderService
     {
-        Task<PagedList<OrderResponseDto>> GetAllAsync(int page = 1, int pageSize = 10, string? status = null, DateTime? fromDate = null, DateTime? toDate = null, CancellationToken cancellationToken = default);
+        Task<PagedList<OrderResponseDto>> GetAllAsync(int page = 1, int pageSize = 10, string? status = null, DateTime? fromDate = null, DateTime? toDate = null, string? sortBy = null, string? sortOrder = "asc", CancellationToken cancellationToken = default);
         Task<OrderResponseDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
         Task<OrderResponseDto> CreateAsync(OrderCreateDto dto, CancellationToken cancellationToken = default);
         Task<OrderResponseDto?> UpdateAsync(int id, OrderUpdateDto dto, CancellationToken cancellationToken = default);

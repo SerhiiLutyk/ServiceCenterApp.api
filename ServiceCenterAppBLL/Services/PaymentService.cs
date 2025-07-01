@@ -19,7 +19,7 @@ public class PaymentService : IPaymentService
         _uow = uow;
     }
 
-    public async Task<PagedList<PaymentResponseDto>> GetAllAsync(int page = 1, int pageSize = 10, DateTime? fromDate = null, DateTime? toDate = null, string? paymentMethod = null, CancellationToken ct = default)
+    public async Task<PagedList<PaymentResponseDto>> GetAllAsync(int page = 1, int pageSize = 10, DateTime? fromDate = null, DateTime? toDate = null, string? paymentMethod = null, string? sortBy = null, string? sortOrder = "asc", CancellationToken ct = default)
     {
         var query = await _uow.Payments.GetAllAsync(ct);
         
@@ -31,6 +31,29 @@ public class PaymentService : IPaymentService
         
         if (!string.IsNullOrEmpty(paymentMethod))
             query = query.Where(p => p.PaymentMethod == paymentMethod);
+
+        if (!string.IsNullOrEmpty(sortBy))
+        {
+            switch (sortBy.ToLower())
+            {
+                case "paymentdate":
+                    query = sortOrder == "desc" ? query.OrderByDescending(x => x.PaymentDate) : query.OrderBy(x => x.PaymentDate);
+                    break;
+                case "amount":
+                    query = sortOrder == "desc" ? query.OrderByDescending(x => x.Amount) : query.OrderBy(x => x.Amount);
+                    break;
+                case "paymentmethod":
+                    query = sortOrder == "desc" ? query.OrderByDescending(x => x.PaymentMethod) : query.OrderBy(x => x.PaymentMethod);
+                    break;
+                default:
+                    query = query.OrderBy(x => x.PaymentId);
+                    break;
+            }
+        }
+        else
+        {
+            query = query.OrderBy(x => x.PaymentId);
+        }
 
         var totalCount = query.Count();
         var items = query

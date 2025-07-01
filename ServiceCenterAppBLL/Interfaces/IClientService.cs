@@ -6,7 +6,7 @@ namespace ServiceCenterAppBLL.Interfaces
 {
     public interface IClientService
     {
-        Task<PagedList<ClientResponseDto>> GetAllAsync(int page = 1, int pageSize = 10, string? searchTerm = null, CancellationToken cancellationToken = default);
+        Task<PagedList<ClientResponseDto>> GetAllAsync(int page = 1, int pageSize = 10, string? searchTerm = null, string? sortBy = null, string? sortOrder = "asc", CancellationToken cancellationToken = default);
         Task<ClientResponseDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
         Task<ClientResponseDto> CreateAsync(ClientCreateDto dto, CancellationToken cancellationToken = default);
         Task<ClientResponseDto?> UpdateAsync(int id, ClientUpdateDto dto, CancellationToken cancellationToken = default);

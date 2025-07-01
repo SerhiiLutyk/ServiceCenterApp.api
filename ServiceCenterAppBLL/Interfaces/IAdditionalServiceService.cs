@@ -5,7 +5,7 @@ namespace ServiceCenterAppBLL.Interfaces
 {
     public interface IAdditionalServiceService
     {
-        Task<PagedList<AdditionalServiceResponseDto>> GetAllAsync(int page = 1, int pageSize = 10, string? searchTerm = null, CancellationToken cancellationToken = default);
+        Task<PagedList<AdditionalServiceResponseDto>> GetAllAsync(int page = 1, int pageSize = 10, string? searchTerm = null, string? sortBy = null, string? sortOrder = "asc", CancellationToken cancellationToken = default);
         Task<AdditionalServiceResponseDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
         Task<AdditionalServiceResponseDto> CreateAsync(AdditionalServiceCreateDto dto, CancellationToken cancellationToken = default);
         Task<AdditionalServiceResponseDto?> UpdateAsync(int id, AdditionalServiceUpdateDto dto, CancellationToken cancellationToken = default);

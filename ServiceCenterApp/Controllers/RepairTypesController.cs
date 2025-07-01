@@ -28,9 +28,11 @@ namespace ServiceCenterApp.Controllers
         public async Task<ActionResult<PagedList<RepairTypeResponseDto>>> GetRepairTypes(
             [FromQuery] int page = 1, 
             [FromQuery] int pageSize = 10,
-            [FromQuery] string? searchTerm = null)
+            [FromQuery] string? searchTerm = null,
+            [FromQuery] string? sortBy = null,
+            [FromQuery] string? sortOrder = "asc")
         {
-            var repairTypes = await _repairTypeService.GetAllAsync(page, pageSize, searchTerm);
+            var repairTypes = await _repairTypeService.GetAllAsync(page, pageSize, searchTerm, sortBy, sortOrder);
             return Ok(repairTypes);
         }
 

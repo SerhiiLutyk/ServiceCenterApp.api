@@ -20,7 +20,7 @@ public class ClientService : IClientService
         _uow = uow;
     }
 
-    public async Task<PagedList<ClientResponseDto>> GetAllAsync(int page = 1, int pageSize = 10, string? searchTerm = null, CancellationToken ct = default)
+    public async Task<PagedList<ClientResponseDto>> GetAllAsync(int page = 1, int pageSize = 10, string? searchTerm = null, string? sortBy = null, string? sortOrder = "asc", CancellationToken ct = default)
     {
         var query = _uow.Clients.GetAll();
         if (!string.IsNullOrEmpty(searchTerm))
@@ -34,6 +34,28 @@ public class ClientService : IClientService
                 x.Email.ToLower().Contains(searchTerm.ToLower())
                 || (isId && x.ClientId == idValue)
             );
+        }
+        if (!string.IsNullOrEmpty(sortBy))
+        {
+            switch (sortBy.ToLower())
+            {
+                case "firstname":
+                    query = sortOrder == "desc" ? query.OrderByDescending(x => x.FirstName) : query.OrderBy(x => x.FirstName);
+                    break;
+                case "lastname":
+                    query = sortOrder == "desc" ? query.OrderByDescending(x => x.LastName) : query.OrderBy(x => x.LastName);
+                    break;
+                case "email":
+                    query = sortOrder == "desc" ? query.OrderByDescending(x => x.Email) : query.OrderBy(x => x.Email);
+                    break;
+                default:
+                    query = query.OrderBy(x => x.ClientId);
+                    break;
+            }
+        }
+        else
+        {
+            query = query.OrderBy(x => x.ClientId);
         }
         var totalCount = query.Count();
         var items = query.Skip((page - 1) * pageSize).Take(pageSize).ToList();

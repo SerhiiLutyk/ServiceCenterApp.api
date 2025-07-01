@@ -28,9 +28,11 @@ namespace ServiceCenterApp.Controllers
         public async Task<ActionResult<PagedList<AdditionalServiceResponseDto>>> GetAdditionalServices(
             [FromQuery] int page = 1, 
             [FromQuery] int pageSize = 10,
-            [FromQuery] string? searchTerm = null)
+            [FromQuery] string? searchTerm = null,
+            [FromQuery] string? sortBy = null,
+            [FromQuery] string? sortOrder = "asc")
         {
-            var services = await _additionalServiceService.GetAllAsync(page, pageSize, searchTerm);
+            var services = await _additionalServiceService.GetAllAsync(page, pageSize, searchTerm, sortBy, sortOrder);
             return Ok(services);
         }
 

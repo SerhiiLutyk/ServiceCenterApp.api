@@ -25,9 +25,11 @@ namespace ServiceCenterApp.Controllers
         public async Task<ActionResult<PagedList<ClientResponseDto>>> GetClients(
             [FromQuery] int page = 1, 
             [FromQuery] int pageSize = 10,
-            [FromQuery] string? searchTerm = null)
+            [FromQuery] string? searchTerm = null,
+            [FromQuery] string? sortBy = null,
+            [FromQuery] string? sortOrder = "asc")
         {
-            var clients = await _clientService.GetAllAsync(page, pageSize, searchTerm);
+            var clients = await _clientService.GetAllAsync(page, pageSize, searchTerm, sortBy, sortOrder);
             return Ok(clients);
         }
 

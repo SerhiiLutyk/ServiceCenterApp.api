@@ -19,7 +19,7 @@ public class OrderService : IOrderService
         _uow = uow;
     }
 
-    public async Task<PagedList<OrderResponseDto>> GetAllAsync(int page = 1, int pageSize = 10, string? status = null, DateTime? fromDate = null, DateTime? toDate = null, CancellationToken ct = default)
+    public async Task<PagedList<OrderResponseDto>> GetAllAsync(int page = 1, int pageSize = 10, string? status = null, DateTime? fromDate = null, DateTime? toDate = null, string? sortBy = null, string? sortOrder = "asc", CancellationToken ct = default)
     {
         var query = await _uow.Orders.GetAllAsync(ct);
         
@@ -31,6 +31,30 @@ public class OrderService : IOrderService
         
         if (toDate.HasValue)
             query = query.Where(o => o.OrderDate <= toDate);
+
+        // Сортування
+        if (!string.IsNullOrEmpty(sortBy))
+        {
+            switch (sortBy.ToLower())
+            {
+                case "orderdate":
+                    query = sortOrder == "desc" ? query.OrderByDescending(x => x.OrderDate) : query.OrderBy(x => x.OrderDate);
+                    break;
+                case "status":
+                    query = sortOrder == "desc" ? query.OrderByDescending(x => x.Status) : query.OrderBy(x => x.Status);
+                    break;
+                case "description":
+                    query = sortOrder == "desc" ? query.OrderByDescending(x => x.Description) : query.OrderBy(x => x.Description);
+                    break;
+                default:
+                    query = query.OrderBy(x => x.OrderId);
+                    break;
+            }
+        }
+        else
+        {
+            query = query.OrderBy(x => x.OrderId);
+        }
 
         var totalCount = query.Count();
         var items = query

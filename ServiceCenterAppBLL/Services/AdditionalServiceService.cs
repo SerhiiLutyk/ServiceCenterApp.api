@@ -19,7 +19,7 @@ public class AdditionalServiceService : IAdditionalServiceService
         _uow = uow;
     }
 
-    public async Task<PagedList<AdditionalServiceResponseDto>> GetAllAsync(int page = 1, int pageSize = 10, string? searchTerm = null, CancellationToken ct = default)
+    public async Task<PagedList<AdditionalServiceResponseDto>> GetAllAsync(int page = 1, int pageSize = 10, string? searchTerm = null, string? sortBy = null, string? sortOrder = "asc", CancellationToken ct = default)
     {
         var query = await _uow.AdditionalServices.GetAllAsync(ct);
         
@@ -31,6 +31,24 @@ public class AdditionalServiceService : IAdditionalServiceService
                 x.Name.ToLower().Contains(searchTerm.ToLower())
                 || (isId && x.ServiceId == idValue)
             );
+        }
+
+        // Сортування
+        if (!string.IsNullOrEmpty(sortBy))
+        {
+            switch (sortBy.ToLower())
+            {
+                case "name":
+                    query = sortOrder == "desc" ? query.OrderByDescending(x => x.Name) : query.OrderBy(x => x.Name);
+                    break;
+                default:
+                    query = query.OrderBy(x => x.ServiceId);
+                    break;
+            }
+        }
+        else
+        {
+            query = query.OrderBy(x => x.ServiceId);
         }
 
         var totalCount = query.Count();
